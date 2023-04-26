@@ -14,6 +14,6 @@ colors:
   crimson: '#900C3F'
 
 github:
-  # zip_url: 
-  tar_url:  https://www.linkedin.com/in/marvisyeh/
-  repository_url: https://github.com/Marvisyeh
+  mail_url: "mailto: marvisyeh@gmail.com"
+  linkin_url:  https://www.linkedin.com/in/marvisyeh/
+  github_url: https://github.com/Marvisyeh
