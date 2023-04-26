@@ -1,10 +1,21 @@
 ---
 layout: default
 ---
+## Side-Project | FindGoods 
+
+
+[![](https://img.shields.io/badge/Python-lightgrey?logo=Python)](#) 
+[![](https://img.shields.io/badge/Flask-lightgrey?logo=flask)](#)
+[![](https://img.shields.io/badge/Mongodb-lightgrey?logo=mongodb)](#)
+[![](https://img.shields.io/badge/MySQL-lightgrey?logo=MySQL)](#)
 
 
 
-<!-- Text can be **bold**, _italic_, or ~~strikethrough~~.
+[Link to another page](./another-page.md)
+
+
+--- 
+Text can be **bold**, _italic_, or ~~strikethrough~~.
 
 [Link to another page](./another-page.md).
 
@@ -122,4 +133,4 @@ Long, single-line code blocks should not wrap. They should horizontally scroll i
 
 ```
 The final element.
-``` -->
+```
