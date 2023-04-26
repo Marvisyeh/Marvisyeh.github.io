@@ -1,6 +1,9 @@
 title: Heng's Portfolio
 logo: /assets/img/logo.png
 description: Hengling's Data Engineer Portfolio.
-show_downloads: true
-google_analytics: #[Your Google Analytics tracking ID]
+# show_downloads: true
+# google_analytics: #[Your Google Analytics tracking ID]
 theme: jekyll-theme-minimal
+
+colors:
+  crimson: '#900C3F'
