@@ -7,7 +7,7 @@ layout: default
 - 整合不同來源資料，提供更即時流暢的資訊
 
 #### DataFlow
-<img src="images\datamart.png"/>
+<img src="images\DataMart.png"/>
 
 #### Data Modelind
 <img src="images\data_modeling.png"/>
