@@ -5,7 +5,7 @@ layout: default
 因應分析需求日益增長，為了維護交易資料庫的效能、降低其負擔，建立資料倉儲。
 
 #### DataFlow
-<img src="assets\img\DataMart.png"/>
+<img src="assets\img\datamart.png"/>
 
 #### Data Modeling
 <img src="assets\img\data_modeling.png"/>
