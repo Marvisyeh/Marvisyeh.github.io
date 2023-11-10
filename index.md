@@ -5,11 +5,8 @@ layout: default
 這個專案使用Apache Airflow建立一個ETL管道。主要目標是從中央氣象署接取36小時的天氣預報、轉換成需求的格式，然後寫入PostgresSQL資料庫中。
 
 #### 資料管線設計
-```mermaid 
-graph LR
-PythonOperator:extract --> PythonOperator:transformer --> PostgresOperator:load
-
-```
+<img src="assets\img\airflow.png"/>
+<p></p>
 
 管線包含以下Task:
 1. extract_data_from_api: <br>
