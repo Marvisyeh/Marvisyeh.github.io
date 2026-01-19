@@ -5,6 +5,9 @@ theme: hugo-theme-stack
 title: Hengling
 copyright: Hengling Yeh
 
+caches:
+  images:
+    dir: :cacheDir/images
 # Theme i18n support
 # Available values: ar, bn, ca, de, el, en, es, fr, hu, id, it, ja, ko, nl, pt-br, th, uk, zh-cn, zh-hk, zh-tw
 DefaultContentLanguage: en

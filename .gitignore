@@ -7,3 +7,10 @@
 
 # docker files
 !docker-compose.yml
+
+# config files
+!.editorconfig
+!.gitignore
+!.gitmodules
+!.github/
+!.github/**
