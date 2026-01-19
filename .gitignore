@@ -2,6 +2,7 @@
 *
 
 # hugo source files
+!config.yaml
 !src/
 !src/**
 
