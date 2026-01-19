@@ -1,4 +1,4 @@
-baseurl: https://marvisyeh.github.io/
+baseURL: https://marvisyeh.github.io/
 # baseurl: http://localhost:1313/
 languageCode: en-us
 theme: hugo-theme-stack

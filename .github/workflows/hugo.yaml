@@ -27,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          submodules: false
+          submodules: recursive
           fetch-depth: 0
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -84,6 +84,10 @@ jobs:
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}/" \
             --cacheDir "${{ runner.temp }}/hugo_cache"
+      - name: Sanity check build output
+        run: |
+          ls -la public | head -n 50
+          test -f public/index.html
       - name: Cache save
         id: cache-save
         uses: actions/cache/save@v5
