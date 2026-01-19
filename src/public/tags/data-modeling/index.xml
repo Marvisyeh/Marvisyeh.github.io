@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Data Modeling on Henglin Yeh</title>
+        <link>http://localhost:1313/tags/data-modeling/</link>
+        <description>Recent content in Data Modeling on Henglin Yeh</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Hengling Yeh</copyright>
+        <lastBuildDate>Sun, 05 May 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/data-modeling/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>資料倉儲架設：從交易系統到分析平台</title>
+        <link>http://localhost:1313/p/data-warehouse-design/</link>
+        <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/data-warehouse-design/</guid>
+        <description>&lt;img src="http://localhost:1313/p/data-warehouse-design/dw.png" alt="Featured image of post 資料倉儲架設：從交易系統到分析平台" /&gt;&lt;h2 id=&#34;專案背景&#34;&gt;專案背景
+&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;本案例為真實生產經驗的抽象化整理，&lt;br&gt;
+所有系統名稱、資料結構與數據皆已去識別與簡化，&lt;br&gt;
+目的在說明設計思路與取捨，而非呈現特定公司實作細節。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在許多早期系統中，交易與分析常共用同一個資料庫，隨著分析需求成長，逐漸暴露出效能與維運問題：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;後台報表查詢常常下複雜的 Aggregation / Join&lt;/li&gt;
+&lt;li&gt;高峰時段查詢會拖慢線上交易，造成系統延遲&lt;/li&gt;
+&lt;li&gt;想多加幾個分析報表，就會讓主資料庫越來越肥胖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;為了&lt;strong&gt;維持交易系統穩定&lt;/strong&gt;、同時又能滿足&lt;strong&gt;越來越多的分析需求&lt;/strong&gt;，我規劃並實作了一套 &lt;strong&gt;資料倉儲架構（Data Warehouse）&lt;/strong&gt;，把「交易」與「分析」清楚分開。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;整體架構概覽data-flow&#34;&gt;整體架構概覽（Data Flow）
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/data-warehouse-design/dw.png&#34;
+	width=&#34;826&#34;
+	height=&#34;412&#34;
+	srcset=&#34;http://localhost:1313/p/data-warehouse-design/dw_hu_b199f94e9c1a3dd.png 480w, http://localhost:1313/p/data-warehouse-design/dw_hu_798cb939df32a569.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Data Warehouse DataFlow&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;200&#34;
+		data-flex-basis=&#34;481px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;整體流程可以拆成幾個層次來看：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Source Layer（交易系統資料庫）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;線上/實體系統運作，寫入交易訂單、使用者行為等資料&lt;/li&gt;
+&lt;li&gt;盡量不在這一層做重型查詢，保護 OLTP 的效能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ODS Layer（暫存層）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;透過排程（例如 Airflow / Cron）定期抽取資料&lt;/li&gt;
+&lt;li&gt;ODS 同時作為原始資料快照，支援資料回補、問題排查與稽核需求。&lt;/li&gt;
+&lt;li&gt;在這一層做基本的資料品質檢查（欄位缺失、格式錯誤、異常值等）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Data Warehouse / DataMart Layer（主體層）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;依照分析需求設計資料模型（例如 Star Schema）&lt;/li&gt;
+&lt;li&gt;把交易明細整理成「事實表」與「維度表」&lt;/li&gt;
+&lt;li&gt;提供報表、Dashboard、Data Scientist 直接查詢&lt;/li&gt;
+&lt;li&gt;主要服務對象包含營運、行銷與資料分析人員，讓非工程角色也能直接透過 SQL 或 BI 工具取用資料。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;這樣設計的好處是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;上游交易系統專心處理「寫入」，下游資料倉儲專心處理「查詢」，彼此透過管線串接，而不是互相干擾。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;資料建模從交易表到混合模型&#34;&gt;資料建模：從交易表到混合模型
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/data-warehouse-design/data_modeling.png&#34;
+	width=&#34;3236&#34;
+	height=&#34;1810&#34;
+	srcset=&#34;http://localhost:1313/p/data-warehouse-design/data_modeling_hu_6a10bb0919345378.png 480w, http://localhost:1313/p/data-warehouse-design/data_modeling_hu_ec65656780290414.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Data Modeling&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;178&#34;
+		data-flex-basis=&#34;429px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在資料建模上，採用混合模型的做法，將資料拆成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;事實表（Fact Table）&lt;/strong&gt;：儲存交易明細，例如訂單金額、數量、折扣、時間等&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;維度表（Dimension Table）&lt;/strong&gt;：描述「誰、什麼、在哪裡、何時」，例如：
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;dim_customer&lt;/code&gt;：使用者屬性（年齡層、城市、註冊來源…）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dim_product&lt;/code&gt;：商品類別、品牌、價格帶…&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dim_date&lt;/code&gt;：日期、週別、月份、季度等時間維度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;這樣做有幾個關鍵好處：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;查詢語意更清楚、好理解&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分析問題可以用「事實 + 維度」來思考，例如：
+&lt;blockquote&gt;
+&lt;p&gt;不同城市（&lt;code&gt;dim_user.city&lt;/code&gt;）在不同月份（&lt;code&gt;dim_date.month&lt;/code&gt;）的銷售額（&lt;code&gt;fact_transaction.amount&lt;/code&gt;）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;效能佳&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;常用查詢可以針對事實表與關鍵維度建立索引&lt;/li&gt;
+&lt;li&gt;報表查詢集中在 DW/DM，不會回頭打爆交易 DB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;擴充容易&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;新增一個維度（例如通路 / 裝置類型）通常不會破壞既有查詢&lt;/li&gt;
+&lt;li&gt;新的報表需求，常常只是在既有 Fact + Dimension 上重新組合&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;etl--elt-流程設計&#34;&gt;ETL / ELT 流程設計
+&lt;/h2&gt;&lt;p&gt;為了讓資料可以穩定從交易系統流向資料倉儲，我設計了多條固定的資料管線：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;抽取（Extract）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;透過排程工具（可以是 Airflow、也可以是簡單的 Cron + Script）&lt;/li&gt;
+&lt;li&gt;以時間區間（例如昨日、上一小時）的方式抽取增量資料&lt;/li&gt;
+&lt;li&gt;把結果先寫入 Staging Table 或中繼檔案（CSV / Parquet）&lt;/li&gt;
+&lt;li&gt;管線設計上支援可重跑（idempotent），即使某批次失敗，也能安全補跑不造成重複資料&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;轉換（Transform）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;清洗異常值、補齊必要欄位&lt;/li&gt;
+&lt;li&gt;依據資料模型，把原始交易表轉成 Fact / Dimension 所需的欄位格式&lt;/li&gt;
+&lt;li&gt;例如：把原始的狀態碼轉成業務看得懂的狀態（成功、取消、退款…）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;載入（Load）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;對 Fact / Dimension Table 做 Insert / Upsert&lt;/li&gt;
+&lt;li&gt;使用批次寫入的方式，降低對資料庫的壓力&lt;/li&gt;
+&lt;li&gt;每次載入完成後，寫入 Log，記錄這批資料的時間區間與筆數&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;成效與改善&#34;&gt;成效與改善
+&lt;/h2&gt;&lt;p&gt;在導入這套資料倉儲架構後，我觀察到幾個明顯的改變（數字可依你實際情況調整）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;常見分析報表（例如日營收、用戶留存）查詢時間從數十秒縮短到數秒級&lt;/li&gt;
+&lt;li&gt;新增報表需求時，可以直接在資料倉儲上組合事實表與維度表，不必再和工程團隊爭取&lt;/li&gt;
+&lt;li&gt;整體數據結構更清楚，新人加入時比較容易理解「資料從哪裡來、可以怎麼用」&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;我的收穫與學習&#34;&gt;我的收穫與學習
+&lt;/h2&gt;&lt;p&gt;這個資料倉儲專案，讓我在幾個面向上有更具體的體會：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;資料架構要從「問題」出發，而不是從「工具」出發&lt;/strong&gt;&lt;br&gt;
+先釐清常見的分析問題（例如 轉換率、留存、周轉等），再回頭設計 Fact / Dimension。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;分層是 Data Platform 的關鍵概念&lt;/strong&gt;&lt;br&gt;
+把 Source / Ods / Data WareHouse / DataMart 分清楚，可以大幅降低耦合度，也讓後續維護更輕鬆。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;資料品質與可觀測性要考慮&lt;/strong&gt;&lt;br&gt;
+不只是有管線、有表就好，還要同時觀察：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;今天的資料有沒有準時到？&lt;/li&gt;
+&lt;li&gt;這一批資料筆數是不是異常？&lt;/li&gt;
+&lt;li&gt;如果某天管線失敗，要怎麼補跑、怎麼回溯？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;這個案例聚焦在資料架構與設計思路，
+實際實作會依組織規模、資料量與資源限制有所取捨。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;使用技術&#34;&gt;使用技術
+&lt;/h2&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;#&#34; &gt;&lt;img src=&#34;https://img.shields.io/badge/Python-lightgrey?logo=Python&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/a&gt;
+&lt;a class=&#34;link&#34; href=&#34;#&#34; &gt;&lt;img src=&#34;https://img.shields.io/badge/MySQL-lightgrey?logo=MySQL&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/a&gt;
+&lt;a class=&#34;link&#34; href=&#34;#&#34; &gt;&lt;img src=&#34;https://img.shields.io/badge/Data%20Modeling-lightgrey&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/a&gt;
+&lt;a class=&#34;link&#34; href=&#34;#&#34; &gt;&lt;img src=&#34;https://img.shields.io/badge/Data%20Warehouse-lightgrey&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Side Project on Henglin Yeh</title>
+        <link>http://localhost:1313/categories/side-project/</link>
+        <description>Recent content in Side Project on Henglin Yeh</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Hengling Yeh</copyright>
+        <lastBuildDate>Wed, 16 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/categories/side-project/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>FindGoods 找好家飾：家飾電商聚合與推薦系統</title>
+        <link>http://localhost:1313/p/findgoods-home-decor-platform/</link>
+        <pubDate>Wed, 16 Feb 2022 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/findgoods-home-decor-platform/</guid>
+        <description>&lt;img src="http://localhost:1313/p/findgoods-home-decor-platform/recom.png" alt="Featured image of post FindGoods 找好家飾：家飾電商聚合與推薦系統" /&gt;&lt;h2 id=&#34;專案背景&#34;&gt;專案背景
+&lt;/h2&gt;&lt;p&gt;疫情與遠端工作的普及，讓很多人開始花更多心力在「家裡的佈置與舒適」。&lt;br&gt;
+但實際在逛家飾時，常見的痛點是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不同電商平台的商品分散，很難一次比較&lt;/li&gt;
+&lt;li&gt;想要找「某種風格」的家飾，卻不知道關鍵字要怎麼下&lt;/li&gt;
+&lt;li&gt;看到了喜歡的圖片（例如 IG、Pinterest），但很難找到「類似風格」的實際商品&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;FindGoods 找好家飾&lt;/strong&gt; 是我和夥伴設計的一個 side project，目標是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;整合多個家飾電商平台的商品，並提供「個人化推薦」與「以圖搜圖」功能，讓使用者可以用更自然的方式找到自己喜歡的家飾。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Marvisyeh/FindGoods-web&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;查看原始程式碼（GitHub）&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;系統概覽與資料流&#34;&gt;系統概覽與資料流
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/findgoods-home-decor-platform/findgood-dataflow.png&#34;
+	width=&#34;2070&#34;
+	height=&#34;948&#34;
+	srcset=&#34;http://localhost:1313/p/findgoods-home-decor-platform/findgood-dataflow_hu_71a3600c5ffdc46c.png 480w, http://localhost:1313/p/findgoods-home-decor-platform/findgood-dataflow_hu_6f6e2a5ca702d5be.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;FindGoods DataFlow&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;218&#34;
+		data-flex-basis=&#34;524px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;整體系統可以拆成幾個主要模組：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;資料蒐集與整合&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;透過爬蟲或 API，從多個家飾電商平台收集商品資訊（圖片、標題、價格、類別、材質…）&lt;/li&gt;
+&lt;li&gt;將原始資料先寫入 MongoDB / 檔案系統，做為原始素材&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;資料處理與特徵建模&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;將結構化資料（價格、類別、風格標籤等）整理進 MySQL，方便做篩選與報表&lt;/li&gt;
+&lt;li&gt;對商品圖片進行特徵擷取（例如使用 CNN / Pretrained Model），把每張圖轉成向量嵌入（Embedding）&lt;/li&gt;
+&lt;li&gt;儲存這些向量，作為「以圖搜圖」與「相似商品推薦」的基礎&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;應用層：瀏覽、推薦與以圖搜圖&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;依照使用者行為與商品特徵，產生個人化推薦清單&lt;/li&gt;
+&lt;li&gt;使用者上傳圖片後，從向量空間找到「視覺上相似」的商品&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;前端介面與使用者體驗&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;以 Flask 為後端框架，提供 API 與頁面渲染&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;系統架構設計&#34;&gt;系統架構設計
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/findgoods-home-decor-platform/findgood-structure.png&#34;
+	width=&#34;2048&#34;
+	height=&#34;1002&#34;
+	srcset=&#34;http://localhost:1313/p/findgoods-home-decor-platform/findgood-structure_hu_bf63947d04e746e1.png 480w, http://localhost:1313/p/findgoods-home-decor-platform/findgood-structure_hu_637801d910d73500.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;FindGoods Architecture&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;204&#34;
+		data-flex-basis=&#34;490px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在架構上，我們把整個系統拆成幾層：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Presentation Layer（前端 / Web）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用者可以透過 Web 介面：
+&lt;ul&gt;
+&lt;li&gt;瀏覽推薦商品&lt;/li&gt;
+&lt;li&gt;上傳一張圖片進行「以圖搜圖」&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Data &amp;amp; ML Services（推薦 / 圖片檢索）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;推薦系統服務：根據使用者歷史與商品特性產生候選清單&lt;/li&gt;
+&lt;li&gt;圖片特徵檢索服務：接收一張圖片 → 轉成向量 → 在向量空間中找出最近鄰商品&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Data Storage Layer&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;MongoDB：儲存原始商品資料與較彈性的欄位&lt;/li&gt;
+&lt;li&gt;MySQL：儲存結構化後的商品資訊與行為資料（例如點擊、收藏）&lt;/li&gt;
+&lt;li&gt;檔案系統 / 物件儲存：儲存商品圖片與預先計算好的特徵向量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;個人化推薦從使用者行為到商品清單&#34;&gt;個人化推薦：從使用者行為到商品清單
+&lt;/h2&gt;&lt;p&gt;在個人化推薦部分，我們採用了「&lt;strong&gt;內容為主的推薦（Content-based Filtering）&lt;/strong&gt;」為主，結合部分行為訊號：&lt;/p&gt;
+&lt;h3 id=&#34;使用的訊號包含&#34;&gt;使用的訊號包含：
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;使用者操作行為：瀏覽、點擊&lt;/li&gt;
+&lt;li&gt;商品屬性：風格（北歐、工業、日系…）、材質（木頭、金屬）、空間（客廳、臥室…）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;基本作法&#34;&gt;基本作法：
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;將商品屬性轉成特徵向量&lt;/li&gt;
+&lt;li&gt;將使用者喜歡 / 常看的商品向量加總或做加權平均，形成「使用者偏好向量」&lt;/li&gt;
+&lt;li&gt;計算使用者向量與所有商品向量的相似度（例如 Cosine Similarity）&lt;/li&gt;
+&lt;li&gt;排序後，過濾掉使用者已看過或不在預算範圍內的商品，做為推薦結果&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;這個專案雖然沒有做到大型商業系統那種 Matrix Factorization 或 Deep Learning 級別的推薦，但專注在「把內容特徵整理好、推薦邏輯清楚」，已經能做出有感的結果。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;我的角色與負責內容&#34;&gt;我的角色與負責內容
+&lt;/h2&gt;&lt;p&gt;在這個 Side Project 中，我主要負責：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;推薦邏輯的設計與實作（Content-based Recommender）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;專案成果與心得&#34;&gt;專案成果與心得
+&lt;/h2&gt;&lt;p&gt;雖然 FindGoods 是一個 side project，但它讓我在「資料產品」這件事上有更完整的實戰經驗：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;從需求（使用者怎麼逛家飾）出發設計資料流，而不是先選技術&lt;/li&gt;
+&lt;li&gt;把推薦系統與資料工程串成一個「完整產品」，而不是分散的 demo&lt;/li&gt;
+&lt;li&gt;練習如何在有限資源下，選擇可行但有感的解法，而不是一開始就追求最複雜的模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Marvisyeh/FindGoods-web&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;查看原始程式碼（GitHub）&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

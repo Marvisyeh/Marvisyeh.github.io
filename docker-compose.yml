@@ -1,0 +1,11 @@
+services:
+  hugo:
+    image: hugomods/hugo:exts-0.153.5
+    container_name: hugo-dev
+    ports:
+      - '1313:1313'
+    volumes:
+      - ./src:/src
+    command: hugo server --bind 0.0.0.0 --port 1313 --disableFastRender
+    environment:
+      - HUGO_ENV=development

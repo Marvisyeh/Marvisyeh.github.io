@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Data Warehouse on Henglin Yeh</title>
+        <link>http://localhost:1313/tags/data-warehouse/</link>
+        <description>Recent content in Data Warehouse on Henglin Yeh</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Hengling Yeh</copyright>
+        <lastBuildDate>Fri, 09 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/data-warehouse/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>ETL Pipeline with Apache Airflow</title>
+        <link>http://localhost:1313/p/etl-pipeline-airflow/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/etl-pipeline-airflow/</guid>
+        <description>&lt;img src="http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph.png" alt="Featured image of post ETL Pipeline with Apache Airflow" /&gt;&lt;h2 id=&#34;專案背景&#34;&gt;專案背景
+&lt;/h2&gt;&lt;p&gt;在資料平台裡，內部交易數據通常不是唯一的訊號，外部情境（例如天氣、節日、事件）常常會直接影響業績或使用者行為。&lt;br&gt;
+這個專案的目標，是把中央氣象署「今明 36 小時天氣預報」產品化成一條&lt;strong&gt;可維運的資料管線&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;固定從 CWB API 抽取未來 36 小時的天氣預報&lt;/li&gt;
+&lt;li&gt;經過清洗與建模，分層寫入 ClickHouse 的 ODS / DW / DM&lt;/li&gt;
+&lt;li&gt;讓後續的報表、分析或模型可以直接 join 這個「天氣維度」&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;主要想解決的痛點是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;抓天氣資料完全用「手動」：臨時打 API、存檔、寫 SQL，流程不透明也難以重複&lt;/li&gt;
+&lt;li&gt;沒有任何&lt;strong&gt;排程、監控與重跑機制&lt;/strong&gt;，資料錯了通常是事後在報表被發現&lt;/li&gt;
+&lt;li&gt;當分析或營運想驗證某一天數值是否合理時，缺乏可以回溯的「原始資料來源」&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此，我設計了一條以 &lt;strong&gt;Apache Airflow 為核心&lt;/strong&gt; 的分層 ETL Pipeline，採用 &lt;strong&gt;ODS → DW → DM 三階段架構&lt;/strong&gt;，&lt;br&gt;
+在 Docker 環境中自動每 6 小時從 CWB API 抽取資料、轉換成結構化格式，最後寫入 ClickHouse。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Marvisyeh/ETL-with-Apache-Airflow&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;查看原始程式碼（GitHub）&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;架構決策為什麼是-ods--dw--dm&#34;&gt;架構決策：為什麼是 ODS / DW / DM？
+&lt;/h2&gt;&lt;p&gt;選擇 ODS / DW / DM 分層，是基於這幾個考量：&lt;/p&gt;
+&lt;h3 id=&#34;odsoperational-data-store層保留真實世界長什麼樣子&#34;&gt;ODS（Operational Data Store）層：保留真實世界長什麼樣子
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;保留原始資料&lt;/strong&gt;：完整儲存 API 回傳資料，作為事後回溯與補跑的基礎&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;資料品質檢查&lt;/strong&gt;：在 ODS 層就先處理欄位缺失、格式錯誤、異常值&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;去重與一致性&lt;/strong&gt;：處理同一時間區間被重複寫入的狀況，避免影響下游&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;dwdata-warehouse層把資料變成分析友好的結構&#34;&gt;DW（Data Warehouse）層：把資料變成分析友好的結構
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;結構化與維度化&lt;/strong&gt;：把 ODS 的原始資料，轉成星型模型（Star Schema）中的事實表 + 維度表&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;時間與地點維度&lt;/strong&gt;：建立 &lt;code&gt;dim_time&lt;/code&gt;、&lt;code&gt;dim_location&lt;/code&gt; 這類常用維度，讓查詢語意更清楚&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;針對查詢優化&lt;/strong&gt;：依據常見的分析需求（例如「城市 x 時間 x 指標」）設計欄位與索引策略&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;dmdata-mart層把數據包成直接能上報表的形狀&#34;&gt;DM（Data Mart）層：把數據包成「直接能上報表」的形狀
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;針對特定場景預先彙總&lt;/strong&gt;：例如「城市 x 時間區段的天氣摘要」、「日粒度的指標表」&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;簡化查詢邏輯&lt;/strong&gt;：下游報表或 Dashboard 不需要再寫太多 join，只要 select 即可&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;為什麼選擇-clickhouse&#34;&gt;為什麼選擇 ClickHouse？
+&lt;/h2&gt;&lt;p&gt;在這條 Pipeline 中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;寫入模式：每 6 小時批次寫入一批天氣資料，資料量隨時間累積&lt;/li&gt;
+&lt;li&gt;查詢模式：以時間 / 城市 / 指標為主的聚合查詢（典型 OLAP / 時序分析場景）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在這個前提下，我比較了幾個選項：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;PostgreSQL&lt;/strong&gt;：團隊熟悉、泛用性高，但在長期累積大量時序資料後，聚合查詢與壓縮成本不是最理想&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ClickHouse&lt;/strong&gt;：列式儲存 + 為 OLAP 設計，對「寫多讀多、讀是聚合查詢」非常友善&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最後選擇 ClickHouse 的原因：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;聚合效能與壓縮比&lt;/strong&gt;：適合大量 append + 聚合的查詢模式，未來資料放大後仍能維持秒級查詢體驗&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;與批次 ETL 相容&lt;/strong&gt;：搭配 Airflow 做批次寫入，比起逐筆寫，能更好發揮 ClickHouse 優勢&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;成本與維運考量&lt;/strong&gt;：在可接受的硬體資源下，能取得不錯的效能與儲存成本平衡&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;架構總覽三條-dag-如何協作&#34;&gt;架構總覽：三條 DAG 如何協作
+&lt;/h2&gt;&lt;p&gt;整個 Pipeline 分成三條 DAG，各自對應一層：&lt;/p&gt;
+&lt;h3 id=&#34;ods-層管線ods_api_weather-dag&#34;&gt;ODS 層管線：&lt;code&gt;ods_api_weather&lt;/code&gt; DAG
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/etl-pipeline-airflow/ods_api_weather-graph.png&#34;
+	width=&#34;3298&#34;
+	height=&#34;1700&#34;
+	srcset=&#34;http://localhost:1313/p/etl-pipeline-airflow/ods_api_weather-graph_hu_6fa60e0ccc818dc8.png 480w, http://localhost:1313/p/etl-pipeline-airflow/ods_api_weather-graph_hu_5c03e5904faa89e8.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;ods api weather&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;194&#34;
+		data-flex-basis=&#34;465px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;負責「資料取得與初步整理」：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;create_table&lt;/strong&gt;：建立 ODS 層的資料表結構&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;extract_data_from_api&lt;/strong&gt;：從中央氣象署 API 取得原始資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;transform_data_use_pandas&lt;/strong&gt;：將 JSON 轉換成結構化格式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;write_to_clickhouse&lt;/strong&gt;：寫入 ClickHouse ODS 層&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;cleanup_duplicate_records&lt;/strong&gt;：清理重複記錄&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;trigger_dw_api_weather&lt;/strong&gt;：觸發 DW 層 DAG 執行&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;dw-層管線dw_api_weather-dag&#34;&gt;DW 層管線（&lt;code&gt;dw_api_weather&lt;/code&gt; DAG）
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph.png&#34;
+	width=&#34;1402&#34;
+	height=&#34;1700&#34;
+	srcset=&#34;http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph_hu_d664113c8329ceeb.png 480w, http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph_hu_2d824d70c2161a5d.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;dw api weather&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;82&#34;
+		data-flex-basis=&#34;197px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;負責「資料建模與維度化」：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/etl-pipeline-airflow/starmodel.png&#34;
+	width=&#34;1394&#34;
+	height=&#34;904&#34;
+	srcset=&#34;http://localhost:1313/p/etl-pipeline-airflow/starmodel_hu_c4122cca3fcb67c2.png 480w, http://localhost:1313/p/etl-pipeline-airflow/starmodel_hu_a9fcb1417e8e5da1.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;starmodel&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;154&#34;
+		data-flex-basis=&#34;370px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;create_table&lt;/strong&gt;：建立 DW 層的維度表（&lt;code&gt;dim_time&lt;/code&gt;、&lt;code&gt;dim_location&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;read_weather_data&lt;/strong&gt;：從 ODS 層讀取當天的天氣資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;transform_weather_data&lt;/strong&gt;：將 ODS 資料轉換成維度表格式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;load_dim_time_data&lt;/strong&gt;：載入時間維度資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;load_dim_location_data&lt;/strong&gt;：載入地點維度資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;load_fact_weather_data&lt;/strong&gt;：載入天氣事實資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;optimize_data&lt;/strong&gt;：優化資料表，合併重複資料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;trigger_dm_api_weather&lt;/strong&gt;: 觸發 DM DAG&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;dm-層管線dm_api_weather-dag&#34;&gt;DM 層管線（&lt;code&gt;dm_api_weather&lt;/code&gt; DAG）
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/etl-pipeline-airflow/dm_api_weather-graph.png&#34;
+	width=&#34;1402&#34;
+	height=&#34;1700&#34;
+	srcset=&#34;http://localhost:1313/p/etl-pipeline-airflow/dm_api_weather-graph_hu_7b52f25c5fa13706.png 480w, http://localhost:1313/p/etl-pipeline-airflow/dm_api_weather-graph_hu_11adac3b58417124.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;dm api weather&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;82&#34;
+		data-flex-basis=&#34;197px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;負責「將資料轉成報表可用」：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;create_table&lt;/strong&gt;：建立彙總表&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;load_weather_summary&lt;/strong&gt;：從 DW 摘要資料，寫入 DM&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;optimize_data&lt;/strong&gt;：優化資料表，合併重複資料&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;結果與影響&#34;&gt;結果與影響
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;從「手動 script」變成「產品化的資料管線」：有排程、有監控、有 Log、有重跑策略&lt;/li&gt;
+&lt;li&gt;資料可回溯與可補跑：ODS 層保留原始資料，遇到問題時可以針對特定日期重新計算&lt;/li&gt;
+&lt;li&gt;結構化的天氣維度：DW / DM 層提供可直接 join 的維度與事實表，查詢語意清楚許多&lt;/li&gt;
+&lt;li&gt;效能與成本平衡：利用 ClickHouse 的列式儲存與批次寫入，在有限資源下維持不錯的查詢體驗&lt;/li&gt;
+&lt;li&gt;可擴充性：未來若要加入更多城市、更多氣象指標，只需在既有架構上增量擴充，而不是重寫整條 Pipeline&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;與資料倉儲架構的關聯&#34;&gt;與資料倉儲架構的關聯
+&lt;/h2&gt;&lt;p&gt;這條 Airflow Pipeline 並不是獨立存在的專案，而是資料平台中負責「資料取得與排程管理」的核心元件。&lt;/p&gt;
+&lt;p&gt;它與資料倉儲設計專案共同解決了三個問題：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;資料如何穩定進來&lt;/strong&gt;（Airflow / ETL）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;資料如何變得好用&lt;/strong&gt;（Data Warehouse / DataMart）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;資料如何在失敗時被追蹤與修復&lt;/strong&gt;（Observability / Logging）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Marvisyeh/ETL-with-Apache-Airflow&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;查看原始程式碼（GitHub）&lt;/a&gt;&lt;/p&gt;
+&lt;!-- ## 使用技術
+
+[![](https://img.shields.io/badge/Apache%20Airflow-017CEE?logo=apacheairflow&amp;logoColor=white)](#)
+[![](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&amp;logoColor=white)](#)
+[![](https://img.shields.io/badge/ClickHouse-FFCC02?logo=clickhouse&amp;logoColor=black)](#)
+[![](https://img.shields.io/badge/Pandas-150458?logo=pandas&amp;logoColor=white)](#)
+[![](https://img.shields.io/badge/Docker-2496ED?logo=docker&amp;logoColor=white)](#) --&gt;</description>
+        </item>
+        
+    </channel>
+</rss>

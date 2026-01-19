@@ -1,5 +1,9 @@
-_site
-.sass-cache
-Gemfile.lock
-*.gem
-.jekyll-cache
+# ignore all files
+*
+
+# hugo source files
+!src/
+!src/**
+
+# docker files
+!docker-compose.yml

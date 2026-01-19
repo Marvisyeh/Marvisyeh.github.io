@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Tags on Henglin Yeh</title>
+        <link>http://localhost:1313/tags/</link>
+        <description>Recent content in Tags on Henglin Yeh</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Hengling Yeh</copyright>
+        <lastBuildDate>Sat, 20 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Docker</title>
+        <link>http://localhost:1313/tags/docker/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/docker/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>FastAPI</title>
+        <link>http://localhost:1313/tags/fastapi/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/fastapi/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Kafka</title>
+        <link>http://localhost:1313/tags/kafka/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/kafka/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>PostgreSQL</title>
+        <link>http://localhost:1313/tags/postgresql/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/postgresql/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>React</title>
+        <link>http://localhost:1313/tags/react/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/react/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Streaming</title>
+        <link>http://localhost:1313/tags/streaming/</link>
+        <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/streaming/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Apache Airflow</title>
+        <link>http://localhost:1313/tags/apache-airflow/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/apache-airflow/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>ClickHouse</title>
+        <link>http://localhost:1313/tags/clickhouse/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/clickhouse/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Data Warehouse</title>
+        <link>http://localhost:1313/tags/data-warehouse/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/data-warehouse/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Pipeline</title>
+        <link>http://localhost:1313/tags/pipeline/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/pipeline/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Python</title>
+        <link>http://localhost:1313/tags/python/</link>
+        <pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/python/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Data Modeling</title>
+        <link>http://localhost:1313/tags/data-modeling/</link>
+        <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/data-modeling/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>DataMart</title>
+        <link>http://localhost:1313/tags/datamart/</link>
+        <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/datamart/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>ETL</title>
+        <link>http://localhost:1313/tags/etl/</link>
+        <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/etl/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>MySQL</title>
+        <link>http://localhost:1313/tags/mysql/</link>
+        <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/mysql/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Flask</title>
+        <link>http://localhost:1313/tags/flask/</link>
+        <pubDate>Wed, 16 Feb 2022 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/flask/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>MongoDB</title>
+        <link>http://localhost:1313/tags/mongodb/</link>
+        <pubDate>Wed, 16 Feb 2022 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/mongodb/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Recommender System</title>
+        <link>http://localhost:1313/tags/recommender-system/</link>
+        <pubDate>Wed, 16 Feb 2022 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/tags/recommender-system/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="設計分層 ETL 架構（ODS/DW），將中央氣象署天氣預報資料自動化整合至 ClickHouse，每 6 小時更新，並建立完整的資料品質與監控機制。">
+<title>ETL Pipeline with Apache Airflow</title>
+
+<link rel='canonical' href='http://localhost:1313/p/etl-pipeline-airflow/'>
+
+<link rel="stylesheet" href="/scss/style.min.d4c99dbf415000dfdd20599fd33e1a7107cf80cf92ffe8075c59f197b3667ac2.css"><meta property='og:title' content="ETL Pipeline with Apache Airflow">
+<meta property='og:description' content="設計分層 ETL 架構（ODS/DW），將中央氣象署天氣預報資料自動化整合至 ClickHouse，每 6 小時更新，並建立完整的資料品質與監控機制。">
+<meta property='og:url' content='http://localhost:1313/p/etl-pipeline-airflow/'>
+<meta property='og:site_name' content='Henglin Yeh'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Apache Airflow' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='ClickHouse' /><meta property='article:tag' content='Data Warehouse' /><meta property='article:tag' content='Pipeline' /><meta property='article:published_time' content='2024-08-09T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-08-09T00:00:00&#43;00:00'/><meta property='og:image' content='http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph.png' />
+<meta name="twitter:title" content="ETL Pipeline with Apache Airflow">
+<meta name="twitter:description" content="設計分層 ETL 架構（ODS/DW），將中央氣象署天氣預報資料自動化整合至 ClickHouse，每 6 小時更新，並建立完整的資料品質與監控機制。"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/etl-pipeline-airflow/dw_api_weather-graph.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_80a118264bd608e.png" width="300"
+                            height="321" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Henglin Yeh</a></h1>
+            <h2 class="site-description">Data Engineer</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/marvisyeh'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.linkedin.com/in/marvisyeh/'
+                        target="_blank"
+                        title="LinkedIn"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+	 viewBox="0 0 45.959 45.959" xml:space="preserve">
+<g>
+	<g>
+		<path d="M5.392,0.492C2.268,0.492,0,2.647,0,5.614c0,2.966,2.223,5.119,5.284,5.119c1.588,0,2.956-0.515,3.957-1.489
+			c0.96-0.935,1.489-2.224,1.488-3.653C10.659,2.589,8.464,0.492,5.392,0.492z M7.847,7.811C7.227,8.414,6.34,8.733,5.284,8.733
+			C3.351,8.733,2,7.451,2,5.614c0-1.867,1.363-3.122,3.392-3.122c1.983,0,3.293,1.235,3.338,3.123
+			C8.729,6.477,8.416,7.256,7.847,7.811z"/>
+		<path d="M0.959,45.467h8.988V12.422H0.959V45.467z M2.959,14.422h4.988v29.044H2.959V14.422z"/>
+		<path d="M33.648,12.422c-4.168,0-6.72,1.439-8.198,2.792l-0.281-2.792H15v33.044h9.959V28.099c0-0.748,0.303-2.301,0.493-2.711
+			c1.203-2.591,2.826-2.591,5.284-2.591c2.831,0,5.223,2.655,5.223,5.797v16.874h10v-18.67
+			C45.959,16.92,39.577,12.422,33.648,12.422z M43.959,43.467h-6V28.593c0-4.227-3.308-7.797-7.223-7.797
+			c-2.512,0-5.358,0-7.099,3.75c-0.359,0.775-0.679,2.632-0.679,3.553v15.368H17V14.422h6.36l0.408,4.044h1.639l0.293-0.473
+			c0.667-1.074,2.776-3.572,7.948-3.572c4.966,0,10.311,3.872,10.311,12.374V43.467z"/>
+	</g>
+</g>
+</svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-tw/" >正體中文</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#專案背景">專案背景</a></li>
+    <li><a href="#架構決策為什麼是-ods--dw--dm">架構決策：為什麼是 ODS / DW / DM？</a>
+      <ol>
+        <li><a href="#odsoperational-data-store層保留真實世界長什麼樣子">ODS（Operational Data Store）層：保留真實世界長什麼樣子</a></li>
+        <li><a href="#dwdata-warehouse層把資料變成分析友好的結構">DW（Data Warehouse）層：把資料變成分析友好的結構</a></li>
+        <li><a href="#dmdata-mart層把數據包成直接能上報表的形狀">DM（Data Mart）層：把數據包成「直接能上報表」的形狀</a></li>
+      </ol>
+    </li>
+    <li><a href="#為什麼選擇-clickhouse">為什麼選擇 ClickHouse？</a></li>
+    <li><a href="#架構總覽三條-dag-如何協作">架構總覽：三條 DAG 如何協作</a>
+      <ol>
+        <li><a href="#ods-層管線ods_api_weather-dag">ODS 層管線：<code>ods_api_weather</code> DAG</a></li>
+        <li><a href="#dw-層管線dw_api_weather-dag">DW 層管線（<code>dw_api_weather</code> DAG）</a></li>
+        <li><a href="#dm-層管線dm_api_weather-dag">DM 層管線（<code>dm_api_weather</code> DAG）</a></li>
+      </ol>
+    </li>
+    <li><a href="#結果與影響">結果與影響</a></li>
+    <li><a href="#與資料倉儲架構的關聯">與資料倉儲架構的關聯</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/etl-pipeline-airflow/">
+                <img src="/p/etl-pipeline-airflow/dw_api_weather-graph_hu_555310a3ec00b17.png"
+                        srcset="/p/etl-pipeline-airflow/dw_api_weather-graph_hu_555310a3ec00b17.png 800w, /p/etl-pipeline-airflow/dw_api_weather-graph_hu_5a2a8096f23594ea.png 1600w"
+                        width="800" 
+                        height="970" 
+                        loading="lazy"
+                        alt="Featured image of post ETL Pipeline with Apache Airflow" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/data-engineering/" >
+                Data Engineering
+            </a>
+        
+            <a href="/categories/etl/" >
+                ETL
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/etl-pipeline-airflow/">ETL Pipeline with Apache Airflow</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            設計分層 ETL 架構（ODS/DW），將中央氣象署天氣預報資料自動化整合至 ClickHouse，每 6 小時更新，並建立完整的資料品質與監控機制。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2024-08-09T00:00:00Z'>Aug 09, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="專案背景">專案背景
+</h2><p>在資料平台裡，內部交易數據通常不是唯一的訊號，外部情境（例如天氣、節日、事件）常常會直接影響業績或使用者行為。<br>
+這個專案的目標，是把中央氣象署「今明 36 小時天氣預報」產品化成一條<strong>可維運的資料管線</strong>：</p>
+<ul>
+<li>固定從 CWB API 抽取未來 36 小時的天氣預報</li>
+<li>經過清洗與建模，分層寫入 ClickHouse 的 ODS / DW / DM</li>
+<li>讓後續的報表、分析或模型可以直接 join 這個「天氣維度」</li>
+</ul>
+<p>主要想解決的痛點是：</p>
+<ul>
+<li>抓天氣資料完全用「手動」：臨時打 API、存檔、寫 SQL，流程不透明也難以重複</li>
+<li>沒有任何<strong>排程、監控與重跑機制</strong>，資料錯了通常是事後在報表被發現</li>
+<li>當分析或營運想驗證某一天數值是否合理時，缺乏可以回溯的「原始資料來源」</li>
+</ul>
+<p>因此，我設計了一條以 <strong>Apache Airflow 為核心</strong> 的分層 ETL Pipeline，採用 <strong>ODS → DW → DM 三階段架構</strong>，<br>
+在 Docker 環境中自動每 6 小時從 CWB API 抽取資料、轉換成結構化格式，最後寫入 ClickHouse。</p>
+<p><a class="link" href="https://github.com/Marvisyeh/ETL-with-Apache-Airflow"  target="_blank" rel="noopener"
+    >查看原始程式碼（GitHub）</a></p>
+<hr>
+<h2 id="架構決策為什麼是-ods--dw--dm">架構決策：為什麼是 ODS / DW / DM？
+</h2><p>選擇 ODS / DW / DM 分層，是基於這幾個考量：</p>
+<h3 id="odsoperational-data-store層保留真實世界長什麼樣子">ODS（Operational Data Store）層：保留真實世界長什麼樣子
+</h3><ul>
+<li><strong>保留原始資料</strong>：完整儲存 API 回傳資料，作為事後回溯與補跑的基礎</li>
+<li><strong>資料品質檢查</strong>：在 ODS 層就先處理欄位缺失、格式錯誤、異常值</li>
+<li><strong>去重與一致性</strong>：處理同一時間區間被重複寫入的狀況，避免影響下游</li>
+</ul>
+<h3 id="dwdata-warehouse層把資料變成分析友好的結構">DW（Data Warehouse）層：把資料變成分析友好的結構
+</h3><ul>
+<li><strong>結構化與維度化</strong>：把 ODS 的原始資料，轉成星型模型（Star Schema）中的事實表 + 維度表</li>
+<li><strong>時間與地點維度</strong>：建立 <code>dim_time</code>、<code>dim_location</code> 這類常用維度，讓查詢語意更清楚</li>
+<li><strong>針對查詢優化</strong>：依據常見的分析需求（例如「城市 x 時間 x 指標」）設計欄位與索引策略</li>
+</ul>
+<h3 id="dmdata-mart層把數據包成直接能上報表的形狀">DM（Data Mart）層：把數據包成「直接能上報表」的形狀
+</h3><ul>
+<li><strong>針對特定場景預先彙總</strong>：例如「城市 x 時間區段的天氣摘要」、「日粒度的指標表」</li>
+<li><strong>簡化查詢邏輯</strong>：下游報表或 Dashboard 不需要再寫太多 join，只要 select 即可</li>
+</ul>
+<hr>
+<h2 id="為什麼選擇-clickhouse">為什麼選擇 ClickHouse？
+</h2><p>在這條 Pipeline 中：</p>
+<ul>
+<li>寫入模式：每 6 小時批次寫入一批天氣資料，資料量隨時間累積</li>
+<li>查詢模式：以時間 / 城市 / 指標為主的聚合查詢（典型 OLAP / 時序分析場景）</li>
+</ul>
+<p>在這個前提下，我比較了幾個選項：</p>
+<ul>
+<li><strong>PostgreSQL</strong>：團隊熟悉、泛用性高，但在長期累積大量時序資料後，聚合查詢與壓縮成本不是最理想</li>
+<li><strong>ClickHouse</strong>：列式儲存 + 為 OLAP 設計，對「寫多讀多、讀是聚合查詢」非常友善</li>
+</ul>
+<p>最後選擇 ClickHouse 的原因：</p>
+<ol>
+<li><strong>聚合效能與壓縮比</strong>：適合大量 append + 聚合的查詢模式，未來資料放大後仍能維持秒級查詢體驗</li>
+<li><strong>與批次 ETL 相容</strong>：搭配 Airflow 做批次寫入，比起逐筆寫，能更好發揮 ClickHouse 優勢</li>
+<li><strong>成本與維運考量</strong>：在可接受的硬體資源下，能取得不錯的效能與儲存成本平衡</li>
+</ol>
+<hr>
+<h2 id="架構總覽三條-dag-如何協作">架構總覽：三條 DAG 如何協作
+</h2><p>整個 Pipeline 分成三條 DAG，各自對應一層：</p>
+<h3 id="ods-層管線ods_api_weather-dag">ODS 層管線：<code>ods_api_weather</code> DAG
+</h3><p><img src="/p/etl-pipeline-airflow/ods_api_weather-graph.png"
+	width="3298"
+	height="1700"
+	srcset="/p/etl-pipeline-airflow/ods_api_weather-graph_hu_6fa60e0ccc818dc8.png 480w, /p/etl-pipeline-airflow/ods_api_weather-graph_hu_5c03e5904faa89e8.png 1024w"
+	loading="lazy"
+	
+		alt="ods api weather"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="194"
+		data-flex-basis="465px"
+	
+></p>
+<p>負責「資料取得與初步整理」：</p>
+<ol>
+<li><strong>create_table</strong>：建立 ODS 層的資料表結構</li>
+<li><strong>extract_data_from_api</strong>：從中央氣象署 API 取得原始資料</li>
+<li><strong>transform_data_use_pandas</strong>：將 JSON 轉換成結構化格式</li>
+<li><strong>write_to_clickhouse</strong>：寫入 ClickHouse ODS 層</li>
+<li><strong>cleanup_duplicate_records</strong>：清理重複記錄</li>
+<li><strong>trigger_dw_api_weather</strong>：觸發 DW 層 DAG 執行</li>
+</ol>
+<h3 id="dw-層管線dw_api_weather-dag">DW 層管線（<code>dw_api_weather</code> DAG）
+</h3><p><img src="/p/etl-pipeline-airflow/dw_api_weather-graph.png"
+	width="1402"
+	height="1700"
+	srcset="/p/etl-pipeline-airflow/dw_api_weather-graph_hu_d664113c8329ceeb.png 480w, /p/etl-pipeline-airflow/dw_api_weather-graph_hu_2d824d70c2161a5d.png 1024w"
+	loading="lazy"
+	
+		alt="dw api weather"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="82"
+		data-flex-basis="197px"
+	
+></p>
+<p>負責「資料建模與維度化」：</p>
+<p><img src="/p/etl-pipeline-airflow/starmodel.png"
+	width="1394"
+	height="904"
+	srcset="/p/etl-pipeline-airflow/starmodel_hu_c4122cca3fcb67c2.png 480w, /p/etl-pipeline-airflow/starmodel_hu_a9fcb1417e8e5da1.png 1024w"
+	loading="lazy"
+	
+		alt="starmodel"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="154"
+		data-flex-basis="370px"
+	
+></p>
+<ol>
+<li><strong>create_table</strong>：建立 DW 層的維度表（<code>dim_time</code>、<code>dim_location</code>）</li>
+<li><strong>read_weather_data</strong>：從 ODS 層讀取當天的天氣資料</li>
+<li><strong>transform_weather_data</strong>：將 ODS 資料轉換成維度表格式</li>
+<li><strong>load_dim_time_data</strong>：載入時間維度資料</li>
+<li><strong>load_dim_location_data</strong>：載入地點維度資料</li>
+<li><strong>load_fact_weather_data</strong>：載入天氣事實資料</li>
+<li><strong>optimize_data</strong>：優化資料表，合併重複資料</li>
+<li><strong>trigger_dm_api_weather</strong>: 觸發 DM DAG</li>
+</ol>
+<h3 id="dm-層管線dm_api_weather-dag">DM 層管線（<code>dm_api_weather</code> DAG）
+</h3><p><img src="/p/etl-pipeline-airflow/dm_api_weather-graph.png"
+	width="1402"
+	height="1700"
+	srcset="/p/etl-pipeline-airflow/dm_api_weather-graph_hu_7b52f25c5fa13706.png 480w, /p/etl-pipeline-airflow/dm_api_weather-graph_hu_11adac3b58417124.png 1024w"
+	loading="lazy"
+	
+		alt="dm api weather"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="82"
+		data-flex-basis="197px"
+	
+></p>
+<p>負責「將資料轉成報表可用」：</p>
+<ol>
+<li><strong>create_table</strong>：建立彙總表</li>
+<li><strong>load_weather_summary</strong>：從 DW 摘要資料，寫入 DM</li>
+<li><strong>optimize_data</strong>：優化資料表，合併重複資料</li>
+</ol>
+<hr>
+<h2 id="結果與影響">結果與影響
+</h2><ul>
+<li>從「手動 script」變成「產品化的資料管線」：有排程、有監控、有 Log、有重跑策略</li>
+<li>資料可回溯與可補跑：ODS 層保留原始資料，遇到問題時可以針對特定日期重新計算</li>
+<li>結構化的天氣維度：DW / DM 層提供可直接 join 的維度與事實表，查詢語意清楚許多</li>
+<li>效能與成本平衡：利用 ClickHouse 的列式儲存與批次寫入，在有限資源下維持不錯的查詢體驗</li>
+<li>可擴充性：未來若要加入更多城市、更多氣象指標，只需在既有架構上增量擴充，而不是重寫整條 Pipeline</li>
+</ul>
+<hr>
+<h2 id="與資料倉儲架構的關聯">與資料倉儲架構的關聯
+</h2><p>這條 Airflow Pipeline 並不是獨立存在的專案，而是資料平台中負責「資料取得與排程管理」的核心元件。</p>
+<p>它與資料倉儲設計專案共同解決了三個問題：</p>
+<ul>
+<li><strong>資料如何穩定進來</strong>（Airflow / ETL）</li>
+<li><strong>資料如何變得好用</strong>（Data Warehouse / DataMart）</li>
+<li><strong>資料如何在失敗時被追蹤與修復</strong>（Observability / Logging）</li>
+</ul>
+<p><a class="link" href="https://github.com/Marvisyeh/ETL-with-Apache-Airflow"  target="_blank" rel="noopener"
+    >查看原始程式碼（GitHub）</a></p>
+<!-- ## 使用技術
+
+[![](https://img.shields.io/badge/Apache%20Airflow-017CEE?logo=apacheairflow&logoColor=white)](#)
+[![](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)](#)
+[![](https://img.shields.io/badge/ClickHouse-FFCC02?logo=clickhouse&logoColor=black)](#)
+[![](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white)](#)
+[![](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#) -->
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/apache-airflow/">Apache Airflow</a>
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/clickhouse/">ClickHouse</a>
+        
+            <a href="/tags/data-warehouse/">Data Warehouse</a>
+        
+            <a href="/tags/pipeline/">Pipeline</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/realtime-compliance-monitoring/">
+        
+        
+            <div class="article-image">
+                <img src="/p/realtime-compliance-monitoring/dashboard.f6dbadce2250cad8ad743e4680927922_hu_218ac5f92ab1df8d.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Real-Time Compliance &amp; Anomaly Monitoring Platform"
+                        data-key="realtime-compliance-monitoring" 
+                        data-hash="md5-9tutziJQytitdD5GgJJ5Ig==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Real-Time Compliance &amp; Anomaly Monitoring Platform</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/data-warehouse-design/">
+        
+        
+            <div class="article-image">
+                <img src="/p/data-warehouse-design/dw.5df0772ff43c21fff48b454c27bae032_hu_479a0fd1f812e6ab.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 資料倉儲架設：從交易系統到分析平台"
+                        data-key="data-warehouse-design" 
+                        data-hash="md5-XfB3L/Q8If/0i0VMJ7rgMg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">資料倉儲架設：從交易系統到分析平台</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 Hengling Yeh
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.33.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.888cccdaf3c934b58bb1982792b4d0fdb89be145d2cabea38c8569bfe7d08117.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
