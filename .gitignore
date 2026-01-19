@@ -1,17 +1,1 @@
-# ignore all files
-*
-
-# hugo source files
-!config.yaml
-!src/
-!src/**
-
-# docker files
-!docker-compose.yml
-
-# config files
-!.editorconfig
-!.gitignore
-!.gitmodules
-!.github/
-!.github/**
+structure.md
