@@ -2,140 +2,140 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://marvisyeh.github.io/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="http://localhost:1313/zh-tw/"
+                href="https://marvisyeh.github.io/zh-tw/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/"
+                href="https://marvisyeh.github.io/"
                 />
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://marvisyeh.github.io/categories/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="http://localhost:1313/zh-tw/categories/"
+                href="https://marvisyeh.github.io/zh-tw/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/categories/"
+                href="https://marvisyeh.github.io/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/categories/data-engineering/</loc>
+    <loc>https://marvisyeh.github.io/categories/data-engineering/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/docker/</loc>
+    <loc>https://marvisyeh.github.io/tags/docker/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/fastapi/</loc>
+    <loc>https://marvisyeh.github.io/tags/fastapi/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/kafka/</loc>
+    <loc>https://marvisyeh.github.io/tags/kafka/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/platform-engineering/</loc>
+    <loc>https://marvisyeh.github.io/categories/platform-engineering/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/postgresql/</loc>
+    <loc>https://marvisyeh.github.io/tags/postgresql/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/post/</loc>
+    <loc>https://marvisyeh.github.io/post/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/react/</loc>
+    <loc>https://marvisyeh.github.io/tags/react/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/p/realtime-compliance-monitoring/</loc>
+    <loc>https://marvisyeh.github.io/p/realtime-compliance-monitoring/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/streaming/</loc>
+    <loc>https://marvisyeh.github.io/tags/streaming/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://marvisyeh.github.io/tags/</loc>
     <lastmod>2025-12-20T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="http://localhost:1313/zh-tw/tags/"
+                href="https://marvisyeh.github.io/zh-tw/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/tags/"
+                href="https://marvisyeh.github.io/tags/"
                 />
   </url><url>
-    <loc>http://localhost:1313/tags/apache-airflow/</loc>
+    <loc>https://marvisyeh.github.io/tags/apache-airflow/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/clickhouse/</loc>
+    <loc>https://marvisyeh.github.io/tags/clickhouse/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/data-warehouse/</loc>
+    <loc>https://marvisyeh.github.io/tags/data-warehouse/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/etl/</loc>
+    <loc>https://marvisyeh.github.io/categories/etl/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/p/etl-pipeline-airflow/</loc>
+    <loc>https://marvisyeh.github.io/p/etl-pipeline-airflow/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/pipeline/</loc>
+    <loc>https://marvisyeh.github.io/tags/pipeline/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/python/</loc>
+    <loc>https://marvisyeh.github.io/tags/python/</loc>
     <lastmod>2024-08-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/data-modeling/</loc>
+    <loc>https://marvisyeh.github.io/tags/data-modeling/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/data-warehouse/</loc>
+    <loc>https://marvisyeh.github.io/categories/data-warehouse/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/datamart/</loc>
+    <loc>https://marvisyeh.github.io/tags/datamart/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/etl/</loc>
+    <loc>https://marvisyeh.github.io/tags/etl/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/mysql/</loc>
+    <loc>https://marvisyeh.github.io/tags/mysql/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/p/data-warehouse-design/</loc>
+    <loc>https://marvisyeh.github.io/p/data-warehouse-design/</loc>
     <lastmod>2024-05-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/data-products/</loc>
+    <loc>https://marvisyeh.github.io/categories/data-products/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/p/findgoods-home-decor-platform/</loc>
+    <loc>https://marvisyeh.github.io/p/findgoods-home-decor-platform/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/flask/</loc>
+    <loc>https://marvisyeh.github.io/tags/flask/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/mongodb/</loc>
+    <loc>https://marvisyeh.github.io/tags/mongodb/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/recommender-system/</loc>
+    <loc>https://marvisyeh.github.io/tags/recommender-system/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/side-project/</loc>
+    <loc>https://marvisyeh.github.io/categories/side-project/</loc>
     <lastmod>2022-02-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/archives/</loc>
+    <loc>https://marvisyeh.github.io/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/</loc>
+    <loc>https://marvisyeh.github.io/page/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/links/</loc>
+    <loc>https://marvisyeh.github.io/links/</loc>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>https://marvisyeh.github.io/search/</loc>
   </url>
 </urlset>
